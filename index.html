@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>STEAM Teacher Feedback</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap");
+
+      :root {
+        --primary: #6c63ff;
+        --accent: #ff6584;
+        --bg: #f0f2f5;
+        --text: #333;
+        --white: #fff;
+        --shadow: rgba(0, 0, 0, 0.08);
+        --gradient: linear-gradient(135deg, var(--primary), var(--accent));
+      }
+
+      body {
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .container {
+        background: var(--white);
+        padding: 40px;
+        border-radius: 25px;
+        max-width: 900px;
+        width: 100%;
+        box-shadow: 0 25px 50px var(--shadow);
+        overflow: hidden; /* For animation purposes */
+        position: relative;
+      }
+
+      h1 {
+        text-align: center;
+        color: var(--primary);
+        font-size: 38px;
+        margin-bottom: 15px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      p.subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 40px;
+        font-size: 17px;
+        line-height: 1.5;
+      }
+
+      h3 {
+        text-align: center;
+        color: var(--accent);
+        font-size: 20px;
+        margin-bottom: 30px;
+      }
+
+      .highlight {
+        background: var(--gradient);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 10px;
+        animation: pulse 2s infinite;
+        font-weight: 600;
+        display: inline-block; /* Allows padding and margin to work correctly */
+        margin-top: 5px; /* Adds a bit of space on mobile */
+        white-space: nowrap; /* Prevents breaking this specific phrase */
+        overflow: hidden; /* Ensures padding is respected */
+        text-overflow: ellipsis; /* Add ellipsis if content overflows */
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(255, 101, 132, 0.6);
+        }
+        70% {
+          box-shadow: 0 0 0 12px rgba(255, 101, 132, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 101, 132, 0);
+        }
+      }
+
+      .form-questions {
+        position: relative;
+        height: auto; /* Will be managed by JS for animation */
+        min-height: 250px; /* Ensure a minimum height to prevent jumps for shorter questions */
+      }
+
+      .question {
+        margin-bottom: 30px;
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        position: absolute;
+        width: 100%;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        transform: translateX(100%);
+        box-sizing: border-box;
+        padding: 0 20px; /* Consistent padding for question content */
+      }
+
+      .question.active {
+        opacity: 1;
+        transform: translateX(0);
+        position: relative; /* Set to relative when active to occupy space */
+      }
+
+      .question.previous {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: var(--text);
+        line-height: 1.4;
+      }
+
+      .options {
+        font-size: 17px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px; /* Spacing between options */
+        margin-bottom: 40px; /* Added margin here to push buttons down */
+      }
+
+      .options label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 1px solid #eee;
+        transition: all 0.3s ease;
+        font-weight: 400; /* Override default label bold */
+        color: #555;
+      }
+
+      .options label:hover {
+        background-color: #f6f6f6;
+        border-color: var(--primary);
+      }
+
+      .options input[type="checkbox"] {
+        accent-color: var(--primary);
+        margin-right: 12px;
+        transform: scale(1.3); /* Slightly larger checkboxes */
+      }
+
+      .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px; /* Reduced margin, as margin is now on .options */
+        padding: 0 20px; /* Align with question padding */
+      }
+
+      button {
+        padding: 14px 32px;
+        background: var(--gradient);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-size: 17px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 6px 15px var(--shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        min-width: 120px;
+      }
+
+      button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      }
+
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+      }
+
+      #prevBtn {
+        background: #ccc;
+      }
+
+      #prevBtn:hover:not(:disabled) {
+        background: #b0b0b0;
+      }
+
+      #submitBtn {
+        background: var(--gradient);
+      }
+
+      .success {
+        text-align: center;
+        margin-top: 20px;
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 24px;
+        padding: 20px;
+        border-radius: 15px;
+        background-color: #e9f9ee; /* Light green background */
+        border: 1px solid #82e0aa; /* Green border */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .success .icon {
+        font-size: 48px;
+        color: #28a745; /* Darker green for icon */
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      /* Mobile responsiveness */
+      @media (max-width: 768px) {
+        body {
+          padding: 20px 10px;
+        }
+
+        .container {
+          padding: 30px 20px;
+          border-radius: 15px;
+        }
+
+        h1 {
+          font-size: 30px;
+        }
+
+        p.subtitle {
+          font-size: 15px;
+          margin-bottom: 30px;
+        }
+
+        h3 {
+          font-size: 16px;
+          margin-bottom: 25px;
+        }
+
+        /* Adjust highlight for mobile */
+        h3 .highlight {
+          display: block; /* Make it a block element to take full width */
+          margin-top: 10px; /* Increase top margin for separation */
+          padding: 6px 10px; /* Adjust padding */
+          font-size: 15px; /* Slightly smaller font size */
+          white-space: normal; /* Allow text to wrap naturally */
+          width: fit-content; /* Adjust width to content */
+          margin-left: auto; /* Center the block */
+          margin-right: auto; /* Center the block */
+        }
+
+        label {
+          font-size: 18px;
+          margin-bottom: 10px;
+        }
+
+        .options {
+          margin-bottom: 30px; /* Adjust margin for mobile */
+        }
+
+        .options label {
+          padding: 10px;
+          font-size: 15px;
+        }
+
+        .options input[type="checkbox"] {
+          transform: scale(1.1);
+        }
+
+        .navigation-buttons {
+          flex-direction: column;
+          gap: 15px;
+          margin-top: 20px; /* Adjust margin for mobile */
+          padding: 0;
+        }
+
+        button {
+          width: 100%;
+          padding: 12px 20px;
+          font-size: 16px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        h1 {
+          font-size: 26px;
+        }
+        p.subtitle {
+          font-size: 14px;
+        }
+        h3 {
+          font-size: 15px;
+        }
+        /* Further refine highlight for very small screens */
+        h3 .highlight {
+          font-size: 14px;
+          padding: 5px 8px;
+        }
+        label {
+          font-size: 16px;
+        }
+        .options label {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="mainContainer">
+        <h1>📊 STEAM Teacher Feedback</h1>
+        <p class="subtitle">Help us improve your experience. Your voice matters!</p>
+        <h3>
+          Remember:
+          <span class="highlight">You Can Select MORE THAN ONE OPTION</span>.
+          First Click = FIRST Priority.
+        </h3>
+        <br />
+        <form id="steamForm">
+          <div class="form-questions">
+            <div class="question active" data-question="1">
+              <label>1. Do you find our current polls engaging?</label>
+              <div class="options">
+                <label>
+                  <input type="checkbox" name="q1" value="Relevant" /> Yes, they are relevant and thought-provoking
+                </label>
+                <label>
+                  <input type="checkbox" name="q1" value="Somewhat" /> Somewhat – a few are helpful, others not much
+                </label>
+                <label>
+                  <input type="checkbox" name="q1" value="Not related" /> Not really – they don’t relate to my classroom
+                </label>
+                <label>
+                  <input type="checkbox" name="q1" value="Haven’t participated" /> I haven’t participated in them yet
+                </label>
+              </div>
+            </div>
+
+            <div class="question" data-question="2">
+              <label>2. What improvements would make our polls more meaningful?</label>
+              <div class="options">
+                <label>
+                  <input type="checkbox" name="q2" value="Creative questions" /> Make questions more creative and scenario-based
+                </label>
+                <label>
+                  <input type="checkbox" name="q2" value="Suggest polls" /> Let me contribute poll ideas
+                </label>
+                <label>
+                  <input type="checkbox" name="q2" value="Interactive tools" /> Use interactive web tools
+                </label>
+                <label>
+                  <input type="checkbox" name="q2" value="Practical connection" /> Connect polls to classroom challenges
+                </label>
+              </div>
+            </div>
+
+            <div class="question" data-question="3">
+              <label>3. What would motivate you to participate in our polls more regularly?</label>
+              <div class="options">
+                <label>
+                  <input type="checkbox" name="q3" value="Impactful feedback" /> Seeing how my input shapes content
+                </label>
+                <label>
+                  <input type="checkbox" name="q3" value="Tips" /> Teaching tips based on poll topics
+                </label>
+                <label>
+                  <input type="checkbox" name="q3" value="Recognition" /> Recognition or shout-outs
+                </label>
+                <label>
+                  <input type="checkbox" name="q3" value="Faster polls" /> Classroom Achievements
+                </label>
+              </div>
+            </div>
+
+            <div class="question" data-question="4">
+              <label>4. How often would you like to receive Contents?</label>
+              <div class="options">
+                <label>
+                  <input type="checkbox" name="q4" value="Daily" /> Daily – short and snappy questions
+                </label>
+                <label>
+                  <input type="checkbox" name="q4" value="2-3 times a week" /> 2–3 times a week – topic-based
+                </label>
+                <label>
+                  <input type="checkbox" name="q4" value="Weekly" /> Weekly – deeper, reflective polls
+                </label>
+                <label>
+                  <input type="checkbox" name="q4" value="Occasionally" /> Only occasionally, when relevant
+                </label>
+              </div>
+            </div>
+
+            <div class="question" data-question="5">
+              <label>5. Would you like themed polls for each day?</label>
+              <div class="options">
+                <label>
+                  <input type="checkbox" name="q5" value="Yes themes" /> Yes, I’d love a theme-based format
+                </label>
+                <label>
+                  <input type="checkbox" name="q5" value="Only weekdays" /> Yes, but only Mon–Fri
+                </label>
+                <label>
+                  <input type="checkbox" name="q5" value="Random fine" /> No, random topics are fine
+                </label>
+                <label>
+                  <input type="checkbox" name="q5" value="No daily polls" /> Polls related to recent news
+                </label>
+              </div>
+            </div>
+
+            <div class="question" data-question="6">
+              <label>6. In which format would you prefer the polls to appear?</label>
+              <div class="options">
+                <label>
+                  <input type="checkbox" name="q6" value="Quick tap" /> Quick tap format
+                </label>
+                <label>
+                  <input type="checkbox" name="q6" value="Google Form" /> Google Forms with optional Qs
+                </label>
+                <label>
+                  <input type="checkbox" name="q6" value="Visual format" /> Visual format with icons/emojis
+                </label>
+                <label>
+                  <input type="checkbox" name="q6" value="Case scenarios" /> Case-based options
+                </label>
+              </div>
+            </div>
+
+            <div class="question" data-question="7">
+              <label>7. What outcome would you ideally like to see from these polls?</label>
+              <div class="options">
+                <label>
+                  <input type="checkbox" name="q7" value="Community" /> Stronger educator community
+                </label>
+                <label>
+                  <input type="checkbox" name="q7" value="Improved practices" /> Better teaching practices
+                </label>
+                <label>
+                  <input type="checkbox" name="q7" value="New tools" /> Discover new tools/techniques
+                </label>
+                <label>
+                  <input type="checkbox" name="q7" value="Inspiration" /> More motivation to innovate
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="navigation-buttons">
+            <button type="button" id="prevBtn" disabled>Previous</button>
+            <button type="button" id="nextBtn">Next</button>
+            <button type="submit" id="submitBtn" class="hidden">Submit Feedback</button>
+          </div>
+        </form>
+      </div>
+      <p class="success hidden" id="successMsg">
+        <span class="icon">🎉</span>
+        Thank you! Your response has been submitted.
+      </p>
+    </div>
+
+    <script>
+      const questions = document.querySelectorAll(".question");
+      const formQuestionsContainer = document.querySelector(".form-questions");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const submitBtn = document.getElementById("submitBtn");
+      const steamForm = document.getElementById("steamForm");
+      const mainContainer = document.getElementById("mainContainer");
+      const successMsg = document.getElementById("successMsg");
+
+      let currentQuestionIndex = 0;
+      const selectionOrder = {}; // Stores the ordered selections for each question
+
+      function showQuestion(index) {
+        questions.forEach((q, i) => {
+          q.classList.remove("active", "previous");
+          if (i < index) {
+            q.classList.add("previous"); // Animate out to the left
+          } else if (i > index) {
+            q.classList.add("next-transition"); // Prepare for next animation if needed
+          }
+        });
+
+        // Set the height of the container to the height of the active question
+        const activeQuestion = questions[index];
+        formQuestionsContainer.style.height = activeQuestion.offsetHeight + "px";
+
+        // Use a timeout to ensure CSS transition applies
+        setTimeout(() => {
+          activeQuestion.classList.add("active");
+          // Remove previous transition class if exists
+          activeQuestion.classList.remove("previous", "next-transition");
+        }, 10); // A small delay
+
+        updateNavigationButtons();
+      }
+
+      function updateNavigationButtons() {
+        prevBtn.disabled = currentQuestionIndex === 0;
+        nextBtn.disabled = currentQuestionIndex === questions.length - 1;
+
+        if (currentQuestionIndex === questions.length - 1) {
+          nextBtn.classList.add("hidden");
+          submitBtn.classList.remove("hidden");
+        } else {
+          nextBtn.classList.remove("hidden");
+          submitBtn.classList.add("hidden");
+        }
+      }
+
+      // Initialize the height of the form questions container
+      function setInitialContainerHeight() {
+        if (questions.length > 0) {
+          formQuestionsContainer.style.height = questions[0].offsetHeight + "px";
+        }
+      }
+
+      // Event listener for checkbox changes to track selection order
+      document.addEventListener("change", function (e) {
+        if (e.target.type === "checkbox") {
+          const name = e.target.name;
+          if (!selectionOrder[name]) selectionOrder[name] = [];
+
+          if (e.target.checked) {
+            // Add to the end if checked and not already present
+            if (!selectionOrder[name].includes(e.target.value)) {
+              selectionOrder[name].push(e.target.value);
+            }
+          } else {
+            // Remove if unchecked
+            selectionOrder[name] = selectionOrder[name].filter((v) => v !== e.target.value);
+          }
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentQuestionIndex < questions.length - 1) {
+          currentQuestionIndex++;
+          showQuestion(currentQuestionIndex);
+        }
+      });
+
+      prevBtn.addEventListener("click", () => {
+        if (currentQuestionIndex > 0) {
+          currentQuestionIndex--;
+          showQuestion(currentQuestionIndex);
+        }
+      });
+
+      steamForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const data = {};
+
+        // Process selections from selectionOrder, maintaining priority
+        Object.keys(selectionOrder).forEach((key) => {
+          if (selectionOrder[key].length > 0) {
+            data[key] = selectionOrder[key].join(" > ");
+          }
+        });
+
+        // Fallback for browsers that might not have processed all change events
+        // (though selectionOrder should be reliable)
+        // Also captures any other form fields if they were present (e.g., text inputs)
+        const formData = new FormData(e.target);
+        for (let [key, value] of formData.entries()) {
+          if (!data[key] || selectionOrder[key].length === 0) {
+            // Only add if not already captured by selectionOrder (for checkboxes)
+            // Or if it's a non-checkbox field
+            if (!data[key]) {
+                 data[key] = value;
+            } else if (value.includes(data[key])) { // To handle multiple selections from FormData for the same name attribute, though selectionOrder is primary for multi-select checkboxes.
+                 data[key] += ", " + value;
+            }
+          }
+        }
+
+
+        // Send data to Google Apps Script
+        fetch("https://script.google.com/macros/s/AKfycbyhDSFKxRnoMJ0VHRXAEBrvZ_nCb12tzdhpV7wqtR-gY4fvrymyBOFEZaKgNFEQ5DFn/exec", {
+          method: "POST",
+          mode: "no-cors", // Important for Google Apps Script as it's a cross-origin request
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+        .then(() => {
+          mainContainer.style.display = "none";
+          successMsg.classList.remove("hidden");
+        })
+        .catch(error => {
+          console.error("Error submitting feedback:", error);
+          // Optionally, display an error message to the user
+          alert("There was an error submitting your feedback. Please try again.");
+        });
+      });
+
+      // Initial display
+      showQuestion(currentQuestionIndex);
+      setInitialContainerHeight();
+
+      // Adjust container height on window resize to ensure responsiveness for questions
+      window.addEventListener('resize', () => {
+        const activeQuestion = questions[currentQuestionIndex];
+        if (activeQuestion) {
+          formQuestionsContainer.style.height = activeQuestion.offsetHeight + "px";
+        }
+      });
+
+    </script>
+  </body>
+</html>
